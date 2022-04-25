@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 
 import db.DB;
@@ -23,6 +24,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public Usuario insert(String name, String senha, String email) {
 	
+		int id = nextId();
 	
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -34,8 +36,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 					);
 			st.setString(1, email);
 			st.setString(2, senha);
-			st.setInt(3, nextId());
+			st.setInt(3, id);
 			st.setString(4, name);
+			
+			
 			
 			st.executeUpdate();
 			
@@ -80,16 +84,22 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
+			
 			st = conn.prepareStatement(
-					"select ID from usuario where ID = (SELECT MAX(id) FROM Usuario)");
-
+					"select ID from usuario"	
+			);
+			
+			List<Integer> list = new ArrayList<>();
+	
 			rs = st.executeQuery();
+			while(rs.next()) {
+				list.add(rs.getInt("id"));
+			}
 			
-			id = rs.getInt("Id");
-			
-			
-			}catch(SQLException e) {
-				e.printStackTrace();
+			id = list.indexOf(list.size())+1;
+
+			}catch(SQLException e){
+				throw new DbException(e.getMessage());
 			}finally {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
