@@ -8,10 +8,21 @@ public class Program {
 	
 	public static void main(String [] args) {
 		
+		
+		//criar usuario
 		UsuarioDao usuarioDao = DaoFactory.createUsuarioDao();
-		usuarioDao.insert("Alisson", "motoqueiro", "DandoGrau@Demoto.com");
+		//usuarioDao.insert("Bruno", "Gallo", "Brunogallo@hotmail.com");
+		
+		//Usuario digita e-mail e senha 
 		
 		
+		//teste login
+		if (usuarioDao.login("Brunogallo@hotmail.com", "Gallo") == true) {
+			System.out.println("login granted");
+		}
+		else {
+			System.out.println("login fail");
+		}
 		
 		
 	}
