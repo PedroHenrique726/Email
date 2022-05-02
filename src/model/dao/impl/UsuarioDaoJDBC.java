@@ -21,7 +21,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		this.conn = conn;
 	}
 
-	public Usuario CriarUsuario(String name, String senha, String email) {
+	public void CriarUsuario(String name, String senha, String email) {
 		if (isValidEmailAddressRegex(email)) {
 
 			int id = nextId();
@@ -44,8 +44,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				DB.closeResultSet(rs);
 				DB.closeStatament(st);
 			}
+		}else {
+			System.out.println("Email digitado errado");
 		}
-		return null;
+	
 
 	}
 
@@ -205,8 +207,13 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public void adicionarContatos(String meuEmail, String emailAdicionado) {
-		String contatos = consultarContatos(meuEmail) + ", " + emailAdicionado;
-		
+		String contatos;
+		if(consultarContatos(meuEmail) == null) {
+		contatos = emailAdicionado;
+		}else {
+			contatos = consultarContatos(meuEmail) + ", " + emailAdicionado;
+		}
+		 
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
@@ -217,8 +224,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 			st.executeUpdate();
 			System.out.println("Contato adicionado");
-		
-		
+
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
@@ -239,7 +245,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			rs = st.executeQuery();
 			rs.next();
 			lista = rs.getString("Contatos");
-		return lista;
+			return lista;
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
@@ -250,7 +256,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public String consulta(String oque, String aonde, String parametro) {
-		
+
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
@@ -261,15 +267,15 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			st.setString(3, parametro);
 			rs = st.executeQuery();
 			rs.next();
-				oque = rs.getString(aonde);
-				return oque;
+			oque = rs.getString(aonde);
+			return oque;
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
 		}
-		
+
 	}
 
 	public boolean isEmailUsed(String email) {
@@ -277,13 +283,12 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
-			st = conn.prepareStatement("SELECT ? " + "FROM Usuario");
-
-			st.setString(1, email);
+			st = conn.prepareStatement("SELECT email FROM Usuario");
 			rs = st.executeQuery();
-			while (rs.next()) {
-				if (email == rs.getString(email)) {
+			while (rs.next()) {	
+				if (email.equals(rs.getString("Email"))) {
 					count++;
+
 				}
 			}
 
@@ -295,6 +300,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 
 		if (count > 0) {
+			System.out.println("Email esta sendo utilizado");
 			return true;
 		} else {
 			return false;

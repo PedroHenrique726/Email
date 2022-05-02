@@ -6,7 +6,7 @@ import model.entities.Usuario;
 
 public interface UsuarioDao {
 
-	Usuario CriarUsuario(String name, String senha, String email);
+	void CriarUsuario(String name, String senha, String email);
 	void update(Usuario obj);
 	
 	
