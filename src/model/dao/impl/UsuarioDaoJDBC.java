@@ -35,7 +35,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				st.setString(2, senha);
 				st.setInt(3, id);
 				st.setString(4, name);
-
 				st.executeUpdate();
 
 			} catch (SQLException e) {
@@ -76,32 +75,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		} else {
 			return false;
 		}
-
 	}
 
-	@Override
-	public void update(Usuario obj) {
 
-	}
-
-	@Override
-	public void deleteByid(Integer id) {
-		// nao alterado ainda
-
-		PreparedStatement st = null;
-		try {
-			st = conn.prepareStatement("DELETE FROM Usuario WHERE Id = ?");
-
-			st.setInt(1, id);
-
-			st.executeUpdate();
-		} catch (SQLException e) {
-			throw new DbException(e.getMessage());
-		} finally {
-			DB.closeStatament(st);
-		}
-
-	}
 
 	@Override
 	public int findByEmail(String email) {
@@ -133,9 +109,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public String findById(int id) {
 		String email = null;
-
 		PreparedStatement st = null;
 		ResultSet rs = null;
+		
 		try {
 			st = conn.prepareStatement("SELECT Email " + "FROM Usuario " + "WHERE ID = ?");
 
@@ -143,7 +119,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			rs = st.executeQuery();
 			if (rs.next()) {
 				email = rs.getString("Email");
-
 				return email;
 			}
 
@@ -156,11 +131,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		return email;
 	}
 
-	@Override
-	public List<Usuario> findAll() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+
 
 	public int nextId() {
 		int id = 0;
@@ -180,7 +151,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
 		}
-
 		return id + 1;
 	}
 
@@ -206,14 +176,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		System.out.println("tamanho da lista: " + listaSeparada.length);
 		for (int i = 0; i < listaSeparada.length; i++) {
 			if (consultarContatos(meuEmail) != null && listaSeparada[i].equals(apagarContato)) {
-				System.out.println("apagado");
+				
 			} else if (i == listaSeparada.length - 1) {
 				listaAtualizada += listaSeparada[i];
-				System.out.println("ultimo da lista");
 			} else if (i < listaSeparada.length) {
-
 				listaAtualizada += listaSeparada[i] + ", ";
-				System.out.println("ainda tem mais");
 			}
 		}
 		updateContatos(meuEmail, listaAtualizada);
@@ -233,9 +200,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 		try {
 			st = conn.prepareStatement("update usuario set contatos = ? where email = ?");
+			
 			st.setString(2, meuEmail);
 			st.setString(1, contatos);
-
 			st.executeUpdate();
 			System.out.println("Contato adicionado");
 
@@ -251,11 +218,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		String lista = "";
 		PreparedStatement st = null;
 		ResultSet rs = null;
+		
 		try {
 			st = conn.prepareStatement("SELECT Contatos " + "FROM Usuario " + "WHERE email = ?");
 
 			st.setString(1, email);
-
 			rs = st.executeQuery();
 			rs.next();
 			lista = rs.getString("Contatos");
@@ -283,7 +250,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
-
 			DB.closeStatament(st);
 		}
 	}
@@ -309,7 +275,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
 		}
-
 	}
 
 	public boolean isEmailUsed(String email) {
@@ -322,24 +287,19 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			while (rs.next()) {
 				if (email.equals(rs.getString("Email"))) {
 					count++;
-
 				}
 			}
-
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
 		}
-
 		if (count > 0) {
 			System.out.println("Email esta sendo utilizado");
 			return true;
 		} else {
 			return false;
 		}
-
 	}
-
 }
