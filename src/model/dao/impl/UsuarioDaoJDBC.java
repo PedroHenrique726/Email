@@ -23,7 +23,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	public void CriarUsuario(String name, String senha, String email) {
 		if (isValidEmailAddressRegex(email)) {
-
+			email = email.toLowerCase();
 			int id = nextId();
 
 			PreparedStatement st = null;
@@ -44,10 +44,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				DB.closeResultSet(rs);
 				DB.closeStatament(st);
 			}
-		}else {
+		} else {
 			System.out.println("Email digitado errado");
 		}
-	
 
 	}
 
@@ -200,20 +199,35 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public Usuario updateContatos(String contatos) {
+	public void apagarContatos(String meuEmail, String apagarContato) {
+		String lista = consultarContatos(meuEmail);
+		String[] listaSeparada = lista.split(", ");
+		String listaAtualizada = "";
+		System.out.println("tamanho da lista: " + listaSeparada.length);
+		for (int i = 0; i < listaSeparada.length; i++) {
+			if (consultarContatos(meuEmail) != null && listaSeparada[i].equals(apagarContato)) {
+				System.out.println("apagado");
+			} else if (i == listaSeparada.length - 1) {
+				listaAtualizada += listaSeparada[i];
+				System.out.println("ultimo da lista");
+			} else if (i < listaSeparada.length) {
 
-		return null;
+				listaAtualizada += listaSeparada[i] + ", ";
+				System.out.println("ainda tem mais");
+			}
+		}
+		updateContatos(meuEmail, listaAtualizada);
 	}
 
 	@Override
 	public void adicionarContatos(String meuEmail, String emailAdicionado) {
 		String contatos;
-		if(consultarContatos(meuEmail) == null) {
-		contatos = emailAdicionado;
-		}else {
-			contatos = consultarContatos(meuEmail) + ", " + emailAdicionado;
+		if (consultarContatos(meuEmail) == null) {
+			contatos = emailAdicionado.toLowerCase();
+		} else {
+			contatos = consultarContatos(meuEmail) + ", " + emailAdicionado.toLowerCase();
 		}
-		 
+
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
@@ -255,6 +269,26 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
+	public void updateContatos(String meuEmail, String alteracao) {
+		PreparedStatement st = null;
+		int id = findByEmail(meuEmail);
+
+		try {
+			st = conn.prepareStatement("update usuario set contatos = ? where id = ?");
+
+			st.setString(1, alteracao);
+			st.setInt(2, id);
+			int rowsAfffected = st.executeUpdate();
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+
+			DB.closeStatament(st);
+		}
+	}
+
+	@Override
 	public String consulta(String oque, String aonde, String parametro) {
 
 		PreparedStatement st = null;
@@ -285,7 +319,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		try {
 			st = conn.prepareStatement("SELECT email FROM Usuario");
 			rs = st.executeQuery();
-			while (rs.next()) {	
+			while (rs.next()) {
 				if (email.equals(rs.getString("Email"))) {
 					count++;
 

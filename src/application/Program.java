@@ -25,10 +25,13 @@ public class Program {
 			System.out.println("login fail");
 		}*/
 		//System.out.println(usuarioDao.consulta("Contatos", "Email", "Brunogallo@hotmail.com"));
-		//System.out.println(usuarioDao.consultarContatos("pedro@email.com"));
+		//System.out.println(usuarioDao.consultarContatos("Brunogallo@hotmail.com"));
 		
-		usuarioDao.adicionarContatos("Alisson@email.com", "pedro@email.com");
-		//usuarioDao.adicionarContatos("Brunogallo@hotmail.com", "thallys@email.com");
+		//usuarioDao.adicionarContatos("Alisson@email.com", "pedro@email.com");
+		//usuarioDao.adicionarContatos("Brunogallo@hotmail.com", "Alisson@email.com");
+		
+		//usuarioDao.updateContatos("Brunogallo@hotmail.com", "thallys@email.com, alisson@email.com, thamires@email.com");
+		usuarioDao.apagarContatos("Brunogallo@hotmail.com", "alisson@email.com");
 		
 	}
 	
