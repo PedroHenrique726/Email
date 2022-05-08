@@ -1,17 +1,16 @@
 package model.dao.impl;
 
+import java.rmi.RemoteException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import db.DB;
 import db.DbException;
 import model.dao.UsuarioDao;
-import model.entities.Usuario;
 
 public class UsuarioDaoJDBC implements UsuarioDao {
 
@@ -21,7 +20,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		this.conn = conn;
 	}
 
-	public void CriarUsuario(String name, String senha, String email) {
+	@Override
+	public String criarUsuario(String name, String senha, String email) throws RemoteException {
 		if (isValidEmailAddressRegex(email)) {
 			email = email.toLowerCase();
 			int id = nextId();
@@ -37,6 +37,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				st.setString(4, name);
 				st.executeUpdate();
 
+				return "Usuário registrado com sucesso";
+				
 			} catch (SQLException e) {
 				throw new DbException(e.getMessage());
 			} finally {
@@ -44,16 +46,18 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				DB.closeStatament(st);
 			}
 		} else {
-			System.out.println("Email digitado errado");
+			return "Email digitado já existe ou email digitado errado!";
 		}
+	
 
 	}
 
 	@Override
-	public boolean login(String email, String senha) {
-
+	public boolean login(String email, String senha) throws RemoteException{
+		
+		
 		String senhaBanco;
-
+		if (isEmailUsed(email)) {
 		PreparedStatement st = null;
 		ResultSet rs = null;
 		try {
@@ -73,14 +77,45 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		if (senha.equals(senhaBanco)) {
 			return true;
 		} else {
+			
+			return false;
+		}
+		
+		}else{
 			return false;
 		}
 	}
 
-
-
 	@Override
-	public int findByEmail(String email) {
+	public String findNameByEmail(String email) throws RemoteException{
+		String nome = "";
+		PreparedStatement st = null;
+		ResultSet rs = null;
+		try {
+			st = conn.prepareStatement("SELECT Nome " + "FROM Usuario " + "WHERE Email = ?");
+
+			st.setString(1, email);
+			rs = st.executeQuery();
+			if (rs.next()) {
+				nome = rs.getString("Nome");
+
+				return nome;
+			}
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatament(st);
+		}
+		
+		
+		return nome;
+	}
+	
+	
+	@Override
+	public int findByEmail(String email) throws RemoteException{
 		int id = 0;
 
 		PreparedStatement st = null;
@@ -107,11 +142,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String findById(int id) {
+	public String findById(int id) throws RemoteException {
 		String email = null;
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		
+
 		try {
 			st = conn.prepareStatement("SELECT Email " + "FROM Usuario " + "WHERE ID = ?");
 
@@ -130,10 +165,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 		return email;
 	}
-
-
-
-	public int nextId() {
+	
+	public int nextId() throws RemoteException {
 		int id = 0;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -153,8 +186,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 		return id + 1;
 	}
-
-	public boolean isValidEmailAddressRegex(String email) {
+	
+	
+	public boolean isValidEmailAddressRegex(String email) throws RemoteException{
 		boolean isEmailIdValid = false;
 
 		if (email != null && email.length() > 0 && isEmailUsed(email) == false) {
@@ -169,14 +203,14 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public void apagarContatos(String meuEmail, String apagarContato) {
+	public String apagarContatos(String meuEmail, String apagarContato) throws RemoteException{
 		String lista = consultarContatos(meuEmail);
 		String[] listaSeparada = lista.split(", ");
 		String listaAtualizada = "";
-		System.out.println("tamanho da lista: " + listaSeparada.length);
+
 		for (int i = 0; i < listaSeparada.length; i++) {
 			if (consultarContatos(meuEmail) != null && listaSeparada[i].equals(apagarContato)) {
-				
+
 			} else if (i == listaSeparada.length - 1) {
 				listaAtualizada += listaSeparada[i];
 			} else if (i < listaSeparada.length) {
@@ -184,28 +218,28 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			}
 		}
 		updateContatos(meuEmail, listaAtualizada);
+		return "Contato apagado com sucesso";
 	}
 
 	@Override
-	public void adicionarContatos(String meuEmail, String emailAdicionado) {
+	public String adicionarContatos(String meuEmail, String emailAdicionado) {
 		String contatos;
 		if (consultarContatos(meuEmail) == null) {
 			contatos = emailAdicionado.toLowerCase();
 		} else {
 			contatos = consultarContatos(meuEmail) + ", " + emailAdicionado.toLowerCase();
 		}
-
+		
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
 		try {
 			st = conn.prepareStatement("update usuario set contatos = ? where email = ?");
-			
+
 			st.setString(2, meuEmail);
 			st.setString(1, contatos);
 			st.executeUpdate();
-			System.out.println("Contato adicionado");
-
+			return "Contato adicionado";
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
@@ -218,7 +252,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		String lista = "";
 		PreparedStatement st = null;
 		ResultSet rs = null;
-		
+
 		try {
 			st = conn.prepareStatement("SELECT Contatos " + "FROM Usuario " + "WHERE email = ?");
 
@@ -236,7 +270,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public void updateContatos(String meuEmail, String alteracao) {
+	public void updateContatos(String meuEmail, String alteracao) throws RemoteException{
 		PreparedStatement st = null;
 		int id = findByEmail(meuEmail);
 
@@ -245,8 +279,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 			st.setString(1, alteracao);
 			st.setInt(2, id);
-			int rowsAfffected = st.executeUpdate();
-
+			st.executeUpdate();
+			
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
@@ -254,30 +288,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 	}
 
-	@Override
-	public String consulta(String oque, String aonde, String parametro) {
-
-		PreparedStatement st = null;
-		ResultSet rs = null;
-		try {
-			st = conn.prepareStatement("SELECT ? " + "FROM Usuario " + "WHERE ? = ?");
-
-			st.setString(1, oque);
-			st.setString(2, aonde);
-			st.setString(3, parametro);
-			rs = st.executeQuery();
-			rs.next();
-			oque = rs.getString(aonde);
-			return oque;
-		} catch (SQLException e) {
-			throw new DbException(e.getMessage());
-		} finally {
-			DB.closeResultSet(rs);
-			DB.closeStatament(st);
-		}
-	}
-
-	public boolean isEmailUsed(String email) {
+	public boolean isEmailUsed(String email) throws RemoteException{
 		int count = 0;
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -296,10 +307,120 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			DB.closeStatament(st);
 		}
 		if (count > 0) {
-			System.out.println("Email esta sendo utilizado");
+			
 			return true;
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public boolean teste() throws RemoteException{
+
+		criarUsuario("Teste", "teste123", "teste123@teste.com");
+		adicionarContatos("teste123@teste.com", "teste1@hotmail.com");
+		adicionarContatos("teste123@teste.com", "teste2@hotmail.com");
+		adicionarContatos("teste123@teste.com", "teste3@hotmail.com");
+		apagarContatos("teste123@teste.com", "teste2@hotmail.com");
+		if (!login("teste123@teste.com", "teste123")) {
+			return false;
+		} else if (!consultarContatos("teste123@teste.com").equals("teste1@hotmail.com, teste3@hotmail.com")) {
+
+			return false;
+		} else {
+			PreparedStatement st = null;
+
+			try {
+				st = conn.prepareStatement("delete from usuario where id = ?");
+
+				st.setInt(1, findByEmail("teste123@teste.com"));
+				st.executeUpdate();
+
+			} catch (SQLException e) {
+				throw new DbException(e.getMessage());
+			} finally {
+
+				DB.closeStatament(st);
+			}
+			return true;
+		}
+
+	
+	}
+	@Override
+	public void criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException{
+
+		meuEmail = meuEmail.toLowerCase();
+		para = para.toLowerCase();
+
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			st = conn.prepareStatement("INSERT INTO Mensagens (De, Para, Assunto, Mensagem) " + "VALUES (?, ?, ?, ?)");
+			st.setString(1, meuEmail);
+			st.setString(2, para);
+			st.setString(3, assunto);
+			st.setString(4, mensagens);
+			st.executeUpdate();
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatament(st);
+		}
+	}
+
+	@Override
+	public String consultarMinhasMensagens(String meuEmail) throws RemoteException{
+		String emails = "";
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			st = conn.prepareStatement("SELECT * " + "FROM Mensagens " + "WHERE Para = ?");
+
+			st.setString(1, meuEmail);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				 emails += "De: " + rs.getString("De") + " Assunto: " + rs.getString("Assunto")
+						+ " Mensagem: \n" + rs.getString("Mensagem") + "\n\n";
+			}
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatament(st);
+		}
+		
+		return emails;
+
+	}
+
+	public String consultarMinhasMensagensEnviadas(String meuEmail) throws RemoteException{
+		String emails = "";
+		PreparedStatement st = null;
+		ResultSet rs = null;
+
+		try {
+			st = conn.prepareStatement("SELECT * " + "FROM Mensagens " + "WHERE De = ?");
+
+			st.setString(1, meuEmail);
+			rs = st.executeQuery();
+			while (rs.next()) {
+				 emails += "De: " + rs.getString("De") + " Assunto: " + rs.getString("Assunto")
+						+ " \\nMensagem: " + rs.getString("Mensagem") + "\n\n";
+			}
+
+		} catch (SQLException e) {
+			throw new DbException(e.getMessage());
+		} finally {
+			DB.closeResultSet(rs);
+			DB.closeStatament(st);
+		}
+		
+		return emails;
 	}
 }

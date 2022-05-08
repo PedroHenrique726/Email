@@ -1,7 +1,6 @@
 package model.dao;
 
 import db.DB;
-import model.dao.impl.MensagensDaoJDBC;
 import model.dao.impl.UsuarioDaoJDBC;
 
 public class DaoFactory {
@@ -11,9 +10,9 @@ public class DaoFactory {
 		return new UsuarioDaoJDBC(DB.getConnection());
 	}
 	
-	public static MensagensDao createMensagensDao() {
+/*	public static MensagensDao createMensagensDao() {
 		return new MensagensDaoJDBC(DB.getConnection());
 	}
 	
-	
+	*/
 }

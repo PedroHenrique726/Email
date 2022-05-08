@@ -1,24 +1,32 @@
 package model.dao;
 
+import java.rmi.Remote;
+import java.rmi.RemoteException;
 
+public interface UsuarioDao extends Remote{
 
-import model.entities.Usuario;
-
-public interface UsuarioDao {
-
+	//teste
+	public abstract boolean teste() throws RemoteException;
+	
 	//usuario
-	void CriarUsuario(String name, String senha, String email);
-	boolean login(String email, String senha);
+	public abstract String criarUsuario(String name, String senha, String email) throws RemoteException;
+	public abstract boolean login(String email, String senha) throws RemoteException;
 	//contatos
-	void adicionarContatos(String meuEmail, String emailAdicionado);
-	String consultarContatos(String email);
-	void apagarContatos(String meuEmail, String apagarContato);
-	void updateContatos(String meuEmail, String alteracao);
+	public abstract String adicionarContatos(String meuEmail, String emailAdicionado) throws RemoteException;
+	public abstract String consultarContatos(String email) throws RemoteException;
+	public abstract String apagarContatos(String meuEmail, String apagarContato) throws RemoteException;
+	public abstract void updateContatos(String meuEmail, String alteracao) throws RemoteException;
 	//consultas
-	String consulta(String oque, String aonde, String parametro);
-	String findById(int id);
-	int findByEmail(String email);
+	
+	public abstract String findNameByEmail(String email) throws RemoteException;
+	public abstract String findById(int id) throws RemoteException;
+	public abstract int findByEmail(String email) throws RemoteException;
 
+	
+	//mensagens
+	public abstract void criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException;
+	public abstract String consultarMinhasMensagens(String meuEmail) throws RemoteException;
+	public abstract String consultarMinhasMensagensEnviadas(String meuEmail) throws RemoteException;
 
 	
 	
