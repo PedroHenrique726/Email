@@ -14,6 +14,7 @@ public interface UsuarioDao extends Remote{
 	//contatos
 	public abstract String adicionarContatos(String meuEmail, String emailAdicionado) throws RemoteException;
 	public abstract String consultarContatos(String email) throws RemoteException;
+	public abstract String consultarContatosCliente(String email) throws RemoteException;
 	public abstract String apagarContatos(String meuEmail, String apagarContato) throws RemoteException;
 	public abstract void updateContatos(String meuEmail, String alteracao) throws RemoteException;
 	//consultas
