@@ -22,7 +22,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public String criarUsuario(String name, String senha, String email) throws RemoteException {
-		if (isValidEmailAddressRegex(email)) {
+		if (isValidEmailAddressRegex(email) && !isEmailUsed(email)) {
 			email = email.toLowerCase();
 			int id = nextId();
 
@@ -186,7 +186,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	public boolean isValidEmailAddressRegex(String email) throws RemoteException {
 		boolean isEmailIdValid = false;
 
-		if (email != null && email.length() > 0 && isEmailUsed(email) == false) {
+		if (email != null && email.length() > 0) {
 			String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
 			Pattern pattern = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
 			Matcher matcher = pattern.matcher(email);
@@ -194,6 +194,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				isEmailIdValid = true;
 			}
 		}
+		
+		
+		
 		return isEmailIdValid;
 	}
 
@@ -217,8 +220,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String adicionarContatos(String meuEmail, String emailAdicionado) {
+	public String adicionarContatos(String meuEmail, String emailAdicionado)throws RemoteException {
 		String contatos;
+		
+		if(isValidEmailAddressRegex(emailAdicionado) && isEmailUsed(emailAdicionado)) {
 		if (consultarContatos(meuEmail) == null) {
 			contatos = emailAdicionado.toLowerCase();
 		} else {
@@ -240,6 +245,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
+		}
+		}else {
+			return "O e-mail que você tentou adicionar é inválido.";
+					
 		}
 	}
 
@@ -351,13 +360,13 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	public boolean teste() throws RemoteException {
 
 		criarUsuario("Teste", "teste123", "teste123@teste.com");
-		adicionarContatos("teste123@teste.com", "teste1@hotmail.com");
-		adicionarContatos("teste123@teste.com", "teste2@hotmail.com");
-		adicionarContatos("teste123@teste.com", "teste3@hotmail.com");
-		apagarContatos("teste123@teste.com", "teste2@hotmail.com");
+		adicionarContatos("teste123@teste.com", "alisson@email.com");
+		adicionarContatos("teste123@teste.com", "amendoin123@gmail.com");
+		adicionarContatos("teste123@teste.com", "pedro@email.com");
+		apagarContatos("teste123@teste.com", "amendoin123@gmail.com");
 		if (!login("teste123@teste.com", "teste123")) {
 			return false;
-		} else if (!consultarContatos("teste123@teste.com").equals("teste1@hotmail.com, teste3@hotmail.com")) {
+		} else if (!consultarContatos("teste123@teste.com").equals("alisson@email.com, pedro@email.com")) {
 
 			return false;
 		} else {
@@ -385,7 +394,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 		meuEmail = meuEmail.toLowerCase();
 		para = para.toLowerCase();
-
+		if(isEmailUsed(para) && isValidEmailAddressRegex(para)) {
+		
 		PreparedStatement st = null;
 		ResultSet rs = null;
 
@@ -402,6 +412,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		} finally {
 			DB.closeResultSet(rs);
 			DB.closeStatament(st);
+		}
+		}else {
+			System.out.println("Email digitado inválido");
 		}
 	}
 

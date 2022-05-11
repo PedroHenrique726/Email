@@ -20,8 +20,8 @@ public class Program {
 
 	
 		
-		
 		try {
+			
 
 			Remote remote = UnicastRemoteObject.exportObject(usuario, 0);
 
