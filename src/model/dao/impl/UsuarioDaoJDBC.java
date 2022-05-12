@@ -203,31 +203,47 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public String apagarContatos(String meuEmail, String apagarContato) throws RemoteException {
 		String lista = consultarContatos(meuEmail);
-		String[] listaSeparada = lista.split(", ");
+		String[] listaSeparada = lista.split(",");
 		String listaAtualizada = "";
 
 		for (int i = 0; i < listaSeparada.length; i++) {
 			if (consultarContatos(meuEmail) != null && listaSeparada[i].equals(apagarContato)) {
 
-			} else if (i == listaSeparada.length - 1) {
+			}else if(consultarContatos(meuEmail) != "" && listaSeparada.length == 1 && listaSeparada[i].equals(apagarContato) && i == 0){
+				listaAtualizada = null;
+			}else if (i == listaSeparada.length - 1 || listaSeparada.length == 1 && i == 0) {
+				
+				
 				listaAtualizada += listaSeparada[i];
-			} else if (i < listaSeparada.length) {
-				listaAtualizada += listaSeparada[i] + ", ";
+				
+			} else if (i <= listaSeparada.length -2) {
+			
+				listaAtualizada += listaSeparada[i] + ",";
 			}
 		}
 		updateContatos(meuEmail, listaAtualizada);
 		return "Contato apagado com sucesso";
 	}
-
+	
+	
 	@Override
 	public String adicionarContatos(String meuEmail, String emailAdicionado)throws RemoteException {
 		String contatos;
 		
 		if(isValidEmailAddressRegex(emailAdicionado) && isEmailUsed(emailAdicionado)) {
-		if (consultarContatos(meuEmail) == null) {
+			
+		if (consultarContatos(meuEmail) == null || consultarContatosCliente(meuEmail) == "Não há Contatos") {
+			
 			contatos = emailAdicionado.toLowerCase();
-		} else {
-			contatos = consultarContatos(meuEmail) + ", " + emailAdicionado.toLowerCase();
+			
+		} else if(consultarContatos(meuEmail).charAt(consultarContatos(meuEmail).length() -1) == ','){
+			contatos = consultarContatos(meuEmail) + emailAdicionado.toLowerCase();
+		}
+		
+		else {
+			
+			contatos = consultarContatos(meuEmail) + "," + emailAdicionado.toLowerCase();
+			
 		}
 
 		PreparedStatement st = null;
@@ -253,7 +269,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String consultarContatosCliente(String email) {
+	public String consultarContatosCliente(String email) throws RemoteException {
 		String lista = "Não há Contatos";
 		String resposta = "Contatos:\n";
 		String[] listaSeparada;
@@ -269,14 +285,20 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			lista = rs.getString("Contatos");
 			if (!lista.equals("")) {
 				
-			listaSeparada = lista.split(", ");
+			listaSeparada = lista.split(",");
 			
 			for(int i = 0; i < listaSeparada.length; i++) {
+				if(listaSeparada[i] == "" || listaSeparada[i] == " ") {
+	
+				}else {
+				
 				resposta += i+1 + "# " + listaSeparada[i] + " \n";
+				}
+				
 			}
 			return resposta;
 			}else {
-				
+				lista = "Não há Contatos";
 				return lista;
 			}
 			
@@ -366,7 +388,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		apagarContatos("teste123@teste.com", "amendoin123@gmail.com");
 		if (!login("teste123@teste.com", "teste123")) {
 			return false;
-		} else if (!consultarContatos("teste123@teste.com").equals("alisson@email.com, pedro@email.com")) {
+		} else if (!consultarContatos("teste123@teste.com").equals("alisson@email.com,pedro@email.com")) {
 
 			return false;
 		} else {
@@ -390,7 +412,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public void criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException {
+	public String criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException {
 
 		meuEmail = meuEmail.toLowerCase();
 		para = para.toLowerCase();
@@ -407,6 +429,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			st.setString(4, mensagens);
 			st.executeUpdate();
 
+			return "E-mail enviado com sucesso.";
 		} catch (SQLException e) {
 			throw new DbException(e.getMessage());
 		} finally {
@@ -415,6 +438,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 		}else {
 			System.out.println("Email digitado inválido");
+			return "E-mail digitado inválido";
 		}
 	}
 

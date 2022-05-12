@@ -13,15 +13,10 @@ public class Program {
 
 	public static void main(String[] args) throws RemoteException {
 
-		
-		
 		Registry registro = null;
 		UsuarioDao usuario = DaoFactory.createUsuarioDao();
 
-	
-		
 		try {
-			
 
 			Remote remote = UnicastRemoteObject.exportObject(usuario, 0);
 

@@ -25,7 +25,7 @@ public interface UsuarioDao extends Remote{
 
 	
 	//mensagens
-	public abstract void criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException;
+	public abstract String criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException;
 	public abstract String consultarMinhasMensagens(String meuEmail) throws RemoteException;
 	public abstract String consultarMinhasMensagensEnviadas(String meuEmail) throws RemoteException;
 
