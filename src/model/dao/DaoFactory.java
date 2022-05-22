@@ -10,9 +10,5 @@ public class DaoFactory {
 		return new UsuarioDaoJDBC(DB.getConnection());
 	}
 	
-/*	public static MensagensDao createMensagensDao() {
-		return new MensagensDaoJDBC(DB.getConnection());
-	}
-	
-	*/
+
 }
