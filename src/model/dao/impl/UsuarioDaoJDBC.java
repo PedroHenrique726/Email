@@ -24,11 +24,16 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public String criarUsuario(String name, String senha, String email) throws RemoteException {
-
+		
 		if (!email.contains("@email.com")) {
 			email += "@email.com";
 		}
-		if (isValidEmailAddressRegex(email) && !isEmailUsed(email)) {
+		if (!isValidEmailAddressRegex(email) || isEmailUsed(email)) {
+			return "E-mail digitado não é válido ou já existe";
+		} else if (!isValidSenhaRegex(senha)) {
+			return "A senha deve conter de 8-20 caracteres, com pelo menos um digito, um alfabeto maiúsculo,"
+					+ "\num alfabeto minúsculo, caractere especial e não possuir espaços em branco.\n";
+		} else {
 			email = email.toLowerCase();
 			int id = nextId();
 			PreparedStatement st = null;
@@ -48,8 +53,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			} finally {
 				DB.closeStatament(st);
 			}
-		} else {
-			return "Email digitado já existe ou email digitado ";
 		}
 	}
 
@@ -190,6 +193,20 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			}
 		}
 		return isEmailIdValid;
+	}
+
+	public boolean isValidSenhaRegex(String senha) throws RemoteException {
+		boolean isSenhaValid = false;
+
+		if (senha != null && senha.length() > 0) {
+			String expression = "^(?=.*[0-9])" + "(?=.*[a-z])(?=.*[A-Z])" + "(?=.*[@#$%^&+=])" + "(?=\\S+$).{8,20}$";
+			Pattern pattern = Pattern.compile(expression);
+			Matcher matcher = pattern.matcher(senha);
+			if (matcher.matches()) {
+				isSenhaValid = true;
+			}
+		}
+		return isSenhaValid;
 	}
 
 	@Override
@@ -372,12 +389,12 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public boolean teste() throws RemoteException {
 
-		criarUsuario("Teste", "teste123", "teste123@email.com");
+		criarUsuario("Teste", "T&ste123", "teste123@email.com");
 		adicionarContatos("teste123@email.com", "admin@email.com");
 		adicionarContatos("teste123@email.com", "admin2@email.com");
 		adicionarContatos("teste123@email.com", "admin3@email.com");
 		apagarContatos("teste123@email.com", "admin2@email.com");
-		if (!login("teste123@email.com", "teste123")) {
+		if (!login("teste123@email.com", "T&ste123")) {
 			System.out.println("Falha no teste de login");
 			return false;
 		} else if (!consultarContatos("teste123@email.com").equals("admin@email.com,admin3@email.com")) {
@@ -435,8 +452,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				DB.closeStatament(st);
 			}
 		} else {
-			System.out.println("Email digitado inv�lido");
-			return "E-mail digitado inv�lido";
+
+			return "E-mail digitado inválido";
 		}
 	}
 

@@ -14,8 +14,29 @@ CREATE TABLE Mensagens
  De VARCHAR(30) NOT NULL,
  Para VARCHAR(60) NOT NULL,
  Assunto VARCHAR(30) NOT NULL,
- Mensagem VARCHAR(1000) NOT NULL
+ Mensagem VARCHAR(1000) NOT NULL,
+ Dia_hora varchar(20) NOT NULL
 ); 
+
+CREATE TABLE Mensagens2 
+( 
+ De VARCHAR(30) NOT NULL,
+ Para VARCHAR(60) NOT NULL,
+ Assunto VARCHAR(30) NOT NULL,
+ Mensagem VARCHAR(1000) NOT NULL,
+ Dia VARCHAR(30) NOT NULL
+); 
+CREATE TABLE Mensagens3 
+( 
+ De VARCHAR(30) NOT NULL,
+ Para VARCHAR(60) NOT NULL,
+ Assunto VARCHAR(30) NOT NULL,
+ Mensagem VARCHAR(1000) NOT NULL,
+ Dia date NOT NULL
+); 
+
+
+ALTER TABLE mensagens ADD Dia_hora varchar(20);
 
 alter table usuario add Contatos varchar(100);
 

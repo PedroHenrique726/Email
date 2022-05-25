@@ -13,16 +13,14 @@ public class Program {
 
 	public static void main(String[] args) throws RemoteException {
 
-		//Conex�o
+		// Conexão
 		Registry registro = null;
 		UsuarioDao usuario = DaoFactory.createUsuarioDao();
-		
-		
 
 		try {
 			Remote remote = UnicastRemoteObject.exportObject(usuario, 0);
 			registro = LocateRegistry.createRegistry(3333);
-			registro.rebind("Email", remote);		
+			registro.rebind("Email", remote);
 
 		} catch (Exception e) {
 			System.out.println("Erro no Servidor:" + e.getMessage());

@@ -13,6 +13,7 @@ public class DB {
 
 	private static Connection conn = null;
 	
+	//Recebe o endereço do banco de dados e faz a conexão com o banco através do DriverManager
 	public static Connection getConnection() {
 		if (conn == null) {
 			try {
@@ -27,6 +28,7 @@ public class DB {
 		return conn;
 	}
 	
+	//Fecha a conexão com o banco de dados
 	public static void closeConnection() {
 		if (conn != null) {
 			try {
@@ -37,6 +39,7 @@ public class DB {
 		}
 	}
 	
+	//Carregar propriedades de login do db.properties
 	private static Properties loadProperties() {
 		try (FileInputStream fs = new FileInputStream("db.properties")) {
 			Properties props = new Properties();

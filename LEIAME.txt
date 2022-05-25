@@ -1,0 +1,9 @@
+Instruções de como executar o programa:
+
+1-Criar database com o códig de criação do banco ou utilizar o Email.sql.
+2-Importar projeto 'Email' e criar uma nova User Library chamada 'MYSQLConnector' e importar o JAR externo (mysql-connector-java-8.0.28.jar).
+3-Importar JRE System library (na criação do projeto foi utilizada o JavaSE-17).
+4-Configurar user e password no arquivo 'db.properties' e caso necessário atualizar o dburl.
+5-Executar o Program.java (Email/src/application/Program.java).
+6-Executar o Usuario.java (UsuarioEmail/src/model/dao/Usuario.java).
+
