@@ -25,8 +25,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public String criarUsuario(String name, String senha, String email) throws RemoteException {
 		
-		if (!email.contains("@email.com")) {
-			email += "@email.com";
+		if (!email.contains("@gambmail.com")) {
+			email += "@gambmail.com";
 		}
 		if (!isValidEmailAddressRegex(email) || isEmailUsed(email)) {
 			return "E-mail digitado não é válido ou já existe";
@@ -59,6 +59,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public boolean login(String email, String senha) throws RemoteException {
 		String senhaBanco;
+		if (!email.contains("@gambmail.com")) {
+			email += "@gambmail.com";
+		}
 
 		if (isEmailUsed(email)) {
 			PreparedStatement st = null;

@@ -1,6 +1,6 @@
 Instruções de como executar o programa:
 
-1-Criar database com o códig de criação do banco ou utilizar o Email.sql.
+1-Criar database com o código de criação do banco no MySQL ou importar o arquivo Email.sql no MySQL.
 2-Importar projeto 'Email' e criar uma nova User Library chamada 'MYSQLConnector' e importar o JAR externo (mysql-connector-java-8.0.28.jar).
 3-Importar JRE System library (na criação do projeto foi utilizada o JavaSE-17).
 4-Configurar user e password no arquivo 'db.properties' e caso necessário atualizar o dburl.
