@@ -6,7 +6,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,15 +18,38 @@ import model.dao.UsuarioDao;
 
 public class UsuarioDaoJDBC implements UsuarioDao {
 
+	private ArrayList<Object> login = new ArrayList<>();
 	private Connection conn;
 
 	public UsuarioDaoJDBC(Connection conn) {
 		this.conn = conn;
 	}
 
+	public int idLogin(String email) {
+
+		Random random = new Random();
+		int numAleatorio = random.nextInt(1000, 10000);
+
+		login.add(numAleatorio);
+		login.add(email);
+
+		System.out.println();
+		return numAleatorio;
+	}
+
+	public String confirmacaoUsuario(int idLogin) {
+
+		int pos = login.indexOf(idLogin);
+		int posEmail = pos + 1;
+
+		String email = (String) login.get(posEmail);
+
+		return email;
+	}
+
 	@Override
 	public String criarUsuario(String name, String senha, String email) throws RemoteException {
-		
+
 		if (!email.contains("@gambmail.com")) {
 			email += "@gambmail.com";
 		}
@@ -37,6 +62,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			email = email.toLowerCase();
 			int id = nextId();
 			PreparedStatement st = null;
+			
+			String str = name.substring(0, 1);
+			String strResto = name.substring(1, name.length());
+			str = str.toUpperCase();
+			name = str + strResto;
 
 			try {
 				st = conn.prepareStatement("INSERT INTO Usuario (Email, Senha, ID, Nome) " + "VALUES (?, ?, ?, ?)");
@@ -59,9 +89,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public boolean login(String email, String senha) throws RemoteException {
 		String senhaBanco;
-		if (!email.contains("@gambmail.com")) {
-			email += "@gambmail.com";
-		}
 
 		if (isEmailUsed(email)) {
 			PreparedStatement st = null;
@@ -92,6 +119,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public String findNameByEmail(String email) throws RemoteException {
+		if (!email.contains("@gambmail.com")) {
+			email += "@gambmail.com";
+		}
+
 		String nome = "";
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -115,7 +146,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public int findByEmail(String email) throws RemoteException {
+	public int findIdByEmail(int idLogin) throws RemoteException {
+		String email = confirmacaoUsuario(idLogin);
+
 		int id = 0;
 
 		PreparedStatement st = null;
@@ -213,15 +246,16 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String apagarContatos(String meuEmail, String apagarContato) throws RemoteException {
-		String lista = consultarContatos(meuEmail);
+	public String apagarContatos(int idLogin, String apagarContato) throws RemoteException {
+
+		String lista = consultarContatos(idLogin);
 		String[] listaSeparada = lista.split(",");
 		String listaAtualizada = "";
 
 		for (int i = 0; i < listaSeparada.length; i++) {
-			if (consultarContatos(meuEmail) != null && listaSeparada[i].equals(apagarContato)) {
+			if (consultarContatos(idLogin) != null && listaSeparada[i].equals(apagarContato)) {
 
-			} else if (consultarContatos(meuEmail) != "" && listaSeparada.length == 1
+			} else if (consultarContatos(idLogin) != "" && listaSeparada.length == 1
 					&& listaSeparada[i].equals(apagarContato) && i == 0) {
 				listaAtualizada = null;
 			} else if (i == listaSeparada.length - 1 || listaSeparada.length == 1 && i == 0) {
@@ -230,32 +264,35 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				listaAtualizada += listaSeparada[i] + ",";
 			}
 		}
-		updateContatos(meuEmail, listaAtualizada);
+		updateContatos(idLogin, listaAtualizada);
 		return "Contato apagado com sucesso";
 	}
 
 	@Override
-	public String adicionarContatos(String meuEmail, String emailAdicionado) throws RemoteException {
+	public String adicionarContatos(int idLogin, String emailAdicionado) throws RemoteException {
+
+		String email = confirmacaoUsuario(idLogin);
+
 		String contatos = null;
 		String resposta = null;
 
 		if (isValidEmailAddressRegex(emailAdicionado) && isEmailUsed(emailAdicionado)) {
 
-			if (consultarContatos(meuEmail) == null || consultarContatosCliente(meuEmail) == "Não há contatos") {
+			if (consultarContatos(idLogin) == null || consultarContatosCliente(idLogin) == "Não há contatos") {
 				contatos = emailAdicionado.toLowerCase();
 				resposta = "Contato adicionado";
 
-			} else if (consultarContatos(meuEmail).charAt(consultarContatos(meuEmail).length() - 1) == ','
-					&& !consultarContatos(meuEmail).contains(emailAdicionado)) {
-				contatos = consultarContatos(meuEmail) + emailAdicionado.toLowerCase();
+			} else if (consultarContatos(idLogin).charAt(consultarContatos(idLogin).length() - 1) == ','
+					&& !consultarContatos(idLogin).contains(emailAdicionado)) {
+				contatos = consultarContatos(idLogin) + emailAdicionado.toLowerCase();
 				resposta = "Contato adicionado";
-			} else if (!consultarContatos(meuEmail).contains(emailAdicionado)) {
-				contatos = consultarContatos(meuEmail) + "," + emailAdicionado.toLowerCase();
+			} else if (!consultarContatos(idLogin).contains(emailAdicionado)) {
+				contatos = consultarContatos(idLogin) + "," + emailAdicionado.toLowerCase();
 				resposta = "Contato adicionado";
 			}
 
 			else {
-				contatos = consultarContatos(meuEmail);
+				contatos = consultarContatos(idLogin);
 				resposta = "Este contato já está na sua lista de contatos";
 			}
 			PreparedStatement st = null;
@@ -264,7 +301,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			try {
 				st = conn.prepareStatement("update usuario set contatos = ? where email = ?");
 
-				st.setString(2, meuEmail);
+				st.setString(2, email);
 				st.setString(1, contatos);
 				st.executeUpdate();
 				return resposta;
@@ -281,7 +318,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String consultarContatosCliente(String email) throws RemoteException {
+	public String consultarContatosCliente(int idLogin) throws RemoteException {
+		String email = confirmacaoUsuario(idLogin);
 		String lista;
 		String resposta = "Contatos:\n";
 		String[] listaSeparada;
@@ -325,7 +363,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 	}
 
-	public String consultarContatos(String email) {
+	public String consultarContatos(int idLogin) {
+
+		String email = confirmacaoUsuario(idLogin);
+
 		String lista = "";
 		PreparedStatement st = null;
 		ResultSet rs = null;
@@ -346,10 +387,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		}
 	}
 
-	@Override
-	public void updateContatos(String meuEmail, String alteracao) throws RemoteException {
+	public void updateContatos(int idLogin, String alteracao) throws RemoteException {
+
 		PreparedStatement st = null;
-		int id = findByEmail(meuEmail);
+		int id = findIdByEmail(idLogin);
 
 		try {
 			st = conn.prepareStatement("update usuario set contatos = ? where id = ?");
@@ -392,44 +433,49 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	@Override
 	public boolean teste() throws RemoteException {
 
-		criarUsuario("Teste", "T&ste123", "teste123@email.com");
-		adicionarContatos("teste123@email.com", "admin@email.com");
-		adicionarContatos("teste123@email.com", "admin2@email.com");
-		adicionarContatos("teste123@email.com", "admin3@email.com");
-		apagarContatos("teste123@email.com", "admin2@email.com");
-		if (!login("teste123@email.com", "T&ste123")) {
+		criarUsuario("Teste", "T&ste123", "teste123@gambmail.com");
+		login("teste123@gambmail.com", "T&ste123");
+		int idLogin = idLogin("teste123@gambmail.com");
+		adicionarContatos( idLogin, "admin@email.com");
+		adicionarContatos(idLogin, "admin2@email.com");
+		adicionarContatos(idLogin, "admin3@email.com");
+		apagarContatos(idLogin, "admin2@email.com");
+		if (!login("teste123@gambmail.com", "T&ste123")) {
 			System.out.println("Falha no teste de login");
 			return false;
-		} else if (!consultarContatos("teste123@email.com").equals("admin@email.com,admin3@email.com")) {
+		} else if (!consultarContatos(idLogin).equals("admin@email.com,admin3@email.com")) {
 			System.out.println("Falha no teste dos contatos");
 			return false;
 		} else {
 			PreparedStatement st = null;
 
 			try {
+
 				st = conn.prepareStatement("delete from usuario where id = ?");
 
-				st.setInt(1, findByEmail("teste123@email.com"));
+				st.setInt(1, findIdByEmail(idLogin));
 				st.executeUpdate();
 
 			} catch (SQLException e) {
 				throw new DbException(e.getMessage());
 			} finally {
-
-				DB.closeStatament(st);
 			}
-			return true;
+
+			DB.closeStatament(st);
 		}
 
+		return true;
 	}
 
-	@Override
-	public String criarMensagens(String meuEmail, String para, String assunto, String mensagens)
-			throws RemoteException {
+	// }
 
+	@Override
+	public String criarMensagens(int idLogin, String para, String assunto, String mensagens) throws RemoteException {
+
+		String email = confirmacaoUsuario(idLogin);
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 		Date data = new Date();
-		meuEmail = meuEmail.toLowerCase();
+		email = email.toLowerCase();
 		para = para.toLowerCase();
 
 		if (isEmailUsed(para) && isValidEmailAddressRegex(para)) {
@@ -440,7 +486,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			try {
 				st = conn.prepareStatement(
 						"INSERT INTO Mensagens (De, Para, Assunto, Mensagem, Dia_hora) " + "VALUES (?, ?, ?, ?, ?)");
-				st.setString(1, meuEmail);
+				st.setString(1, email);
 				st.setString(2, para);
 				st.setString(3, assunto);
 				st.setString(4, mensagens);
@@ -461,7 +507,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String consultarMinhasMensagens(String meuEmail) throws RemoteException {
+	public String consultarMinhasMensagens(int idLogin) throws RemoteException {
+
+		String email = confirmacaoUsuario(idLogin);
 		String emails = "";
 		String[] mensagemSeparada;
 		String mensagemAjustada = "";
@@ -471,7 +519,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 		try {
 			st = conn.prepareStatement("SELECT * " + "FROM Mensagens " + "WHERE Para = ?");
-			st.setString(1, meuEmail);
+			st.setString(1, email);
 			rs = st.executeQuery();
 			while (rs.next()) {
 				mensagemSeparada = rs.getString("mensagem").split(" ");
@@ -498,7 +546,8 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		return emails;
 	}
 
-	public String consultarMinhasMensagensEnviadas(String meuEmail) throws RemoteException {
+	public String consultarMinhasMensagensEnviadas(int idLogin) throws RemoteException {
+		String email = confirmacaoUsuario(idLogin);
 		String emails = "";
 		String[] mensagemSeparada;
 		String mensagemAjustada = "";
@@ -508,7 +557,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		try {
 			st = conn.prepareStatement("SELECT * " + "FROM Mensagens " + "WHERE De = ?");
 
-			st.setString(1, meuEmail);
+			st.setString(1, email);
 			rs = st.executeQuery();
 			while (rs.next()) {
 				mensagemSeparada = rs.getString("mensagem").split(" ");

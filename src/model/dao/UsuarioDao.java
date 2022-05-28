@@ -11,23 +11,24 @@ public interface UsuarioDao extends Remote{
 	//usuario
 	public abstract String criarUsuario(String name, String senha, String email) throws RemoteException;
 	public abstract boolean login(String email, String senha) throws RemoteException;
+	public abstract int idLogin(String email) throws RemoteException;
 	
 	//contatos
-	public abstract String adicionarContatos(String meuEmail, String emailAdicionado) throws RemoteException;
-	public abstract String consultarContatos(String email) throws RemoteException;
-	public abstract String consultarContatosCliente(String email) throws RemoteException;
-	public abstract String apagarContatos(String meuEmail, String apagarContato) throws RemoteException;
-	public abstract void updateContatos(String meuEmail, String alteracao) throws RemoteException;
+	public abstract String adicionarContatos(int idLogin, String emailAdicionado) throws RemoteException;
+	public abstract String consultarContatos(int idLogin) throws RemoteException;
+	public abstract String consultarContatosCliente(int idLogin) throws RemoteException;
+	public abstract String apagarContatos(int idLogin, String apagarContato) throws RemoteException;
+	
 	
 	//consultas	
 	public abstract String findNameByEmail(String email) throws RemoteException;
-	public abstract String findById(int id) throws RemoteException;
-	public abstract int findByEmail(String email) throws RemoteException;
+	public abstract String findById(int idLogin) throws RemoteException;
+	public abstract int findIdByEmail(int idLogin) throws RemoteException;
 	
 	//mensagens
-	public abstract String criarMensagens(String meuEmail, String para, String assunto, String mensagens) throws RemoteException;
-	public abstract String consultarMinhasMensagens(String meuEmail) throws RemoteException;
-	public abstract String consultarMinhasMensagensEnviadas(String meuEmail) throws RemoteException;
+	public abstract String criarMensagens(int idLogin, String para, String assunto, String mensagens) throws RemoteException;
+	public abstract String consultarMinhasMensagens(int idLogin) throws RemoteException;
+	public abstract String consultarMinhasMensagensEnviadas(int idLogin) throws RemoteException;
 
 	
 	
