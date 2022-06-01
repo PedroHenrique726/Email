@@ -27,13 +27,17 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	public int idLogin(String email) {
 
+		if (!email.contains("@gambmail.com")) {
+			email += "@gambmail.com";
+		}
+
 		Random random = new Random();
-		int numAleatorio = random.nextInt(1000, 10000);
+		int numAleatorio = random.nextInt(1, 100000);
 
 		login.add(numAleatorio);
 		login.add(email);
 
-		System.out.println();
+		System.out.println(login);
 		return numAleatorio;
 	}
 
@@ -41,7 +45,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 		int pos = login.indexOf(idLogin);
 		int posEmail = pos + 1;
-
 		String email = (String) login.get(posEmail);
 
 		return email;
@@ -54,15 +57,15 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			email += "@gambmail.com";
 		}
 		if (!isValidEmailAddressRegex(email) || isEmailUsed(email)) {
-			return "E-mail digitado não é válido ou já existe";
+			return "E-mail digitado nao e valido ou ja existe";
 		} else if (!isValidSenhaRegex(senha)) {
 			return "A senha deve conter de 8-20 caracteres, com pelo menos um digito, um alfabeto maiúsculo,"
-					+ "\num alfabeto minúsculo, caractere especial e não possuir espaços em branco.\n";
+					+ "\num alfabeto minúsculo, caractere especial e nao possuir espacos em branco.\n";
 		} else {
 			email = email.toLowerCase();
 			int id = nextId();
 			PreparedStatement st = null;
-			
+
 			String str = name.substring(0, 1);
 			String strResto = name.substring(1, name.length());
 			str = str.toUpperCase();
@@ -76,7 +79,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				st.setString(4, name);
 				st.executeUpdate();
 
-				return "Usuário registrado com sucesso";
+				return "Usuario registrado com sucesso";
 
 			} catch (SQLException e) {
 				throw new DbException(e.getMessage());
@@ -88,8 +91,13 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 	@Override
 	public boolean login(String email, String senha) throws RemoteException {
-		String senhaBanco;
 
+		String senhaBanco;
+		email = email.toLowerCase();
+
+		if (!email.contains("@gambmail.com")) {
+			email += "@gambmail.com";
+		}
 		if (isEmailUsed(email)) {
 			PreparedStatement st = null;
 			ResultSet rs = null;
@@ -118,7 +126,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 	}
 
 	@Override
-	public String findNameByEmail(String email) throws RemoteException {
+	public String findNameByEmail(int idLogin) throws RemoteException {
+
+		String email = confirmacaoUsuario(idLogin);
+
 		if (!email.contains("@gambmail.com")) {
 			email += "@gambmail.com";
 		}
@@ -216,7 +227,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		return id + 1;
 	}
 
-	// Verificar se o e-mail � v�lido
+	// Verificar se o e-mail e valido
 	public boolean isValidEmailAddressRegex(String email) throws RemoteException {
 		boolean isEmailIdValid = false;
 
@@ -278,7 +289,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 
 		if (isValidEmailAddressRegex(emailAdicionado) && isEmailUsed(emailAdicionado)) {
 
-			if (consultarContatos(idLogin) == null || consultarContatosCliente(idLogin) == "Não há contatos") {
+			if (consultarContatos(idLogin) == null || consultarContatosCliente(idLogin) == "Nao ha contatos") {
 				contatos = emailAdicionado.toLowerCase();
 				resposta = "Contato adicionado";
 
@@ -289,11 +300,9 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			} else if (!consultarContatos(idLogin).contains(emailAdicionado)) {
 				contatos = consultarContatos(idLogin) + "," + emailAdicionado.toLowerCase();
 				resposta = "Contato adicionado";
-			}
-
-			else {
+			} else {
 				contatos = consultarContatos(idLogin);
-				resposta = "Este contato já está na sua lista de contatos";
+				resposta = "Este contato ja esta na sua lista de contatos";
 			}
 			PreparedStatement st = null;
 			ResultSet rs = null;
@@ -312,7 +321,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				DB.closeStatament(st);
 			}
 		} else {
-			resposta = "O e-mail que você tentou adicionar é inválido.";
+			resposta = "O e-mail que você tentou adicionar e invalido.";
 			return resposta;
 		}
 	}
@@ -336,10 +345,10 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			lista = rs.getString("Contatos");
 
 			if (lista == null) {
-				lista = "Não há contatos";
+				lista = "Nao ha contatos";
 
 			}
-			if (!lista.equals("") && !lista.equals("Não há contatos")) {
+			if (!lista.equals("") && !lista.equals("Nao ha contatos")) {
 
 				listaSeparada = lista.split(",");
 
@@ -351,7 +360,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				}
 				return resposta;
 			} else {
-				lista = "Não há contatos";
+				lista = "Nao ha contatos";
 				return lista;
 			}
 
@@ -412,6 +421,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		try {
 			st = conn.prepareStatement("SELECT email FROM Usuario");
 			rs = st.executeQuery();
+
 			while (rs.next()) {
 				if (email.equals(rs.getString("Email"))) {
 					count++;
@@ -436,10 +446,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 		criarUsuario("Teste", "T&ste123", "teste123@gambmail.com");
 		login("teste123@gambmail.com", "T&ste123");
 		int idLogin = idLogin("teste123@gambmail.com");
-		adicionarContatos( idLogin, "admin@email.com");
+		adicionarContatos(idLogin, "admin@email.com");
 		adicionarContatos(idLogin, "admin2@email.com");
 		adicionarContatos(idLogin, "admin3@email.com");
 		apagarContatos(idLogin, "admin2@email.com");
+
 		if (!login("teste123@gambmail.com", "T&ste123")) {
 			System.out.println("Falha no teste de login");
 			return false;
@@ -452,7 +463,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			try {
 
 				st = conn.prepareStatement("delete from usuario where id = ?");
-
 				st.setInt(1, findIdByEmail(idLogin));
 				st.executeUpdate();
 
@@ -460,14 +470,11 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 				throw new DbException(e.getMessage());
 			} finally {
 			}
-
 			DB.closeStatament(st);
 		}
 
 		return true;
 	}
-
-	// }
 
 	@Override
 	public String criarMensagens(int idLogin, String para, String assunto, String mensagens) throws RemoteException {
@@ -502,7 +509,7 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 			}
 		} else {
 
-			return "E-mail digitado inválido";
+			return "E-mail digitado invalido";
 		}
 	}
 
@@ -571,7 +578,6 @@ public class UsuarioDaoJDBC implements UsuarioDao {
 						+ rs.getString("Dia_hora").substring(0, 10) + ", as "
 						+ rs.getString("Dia_hora").substring(11, 19) + "\nAssunto: " + rs.getString("Assunto")
 						+ "\nMensagem: " + mensagemAjustada + "\n\n\n";
-
 				mensagemAjustada = "";
 			}
 

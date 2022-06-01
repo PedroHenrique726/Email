@@ -18,3 +18,6 @@ CREATE TABLE Mensagens
  Dia_hora varchar(20) NOT NULL
 ); 
 
+INSERT INTO Usuario (Email, Senha, ID, Nome) VALUES ("admin@email.com", "123456", 1, "Admin");
+INSERT INTO Usuario (Email, Senha, ID, Nome) VALUES ("admin2@email.com", "123456", 2, "Admin2");
+INSERT INTO Usuario (Email, Senha, ID, Nome) VALUES ("admin3@email.com", "123456", 3, "Admin3");

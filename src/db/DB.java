@@ -13,7 +13,7 @@ public class DB {
 
 	private static Connection conn = null;
 	
-	//Recebe o endereço do banco de dados e faz a conexão com o banco através do DriverManager
+	//Recebe o endereço do banco de dados e faz a conexão com o banco atraves do DriverManager
 	public static Connection getConnection() {
 		if (conn == null) {
 			try {

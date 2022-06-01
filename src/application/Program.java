@@ -13,7 +13,7 @@ public class Program {
 
 	public static void main(String[] args) throws RemoteException {
 
-		// Conexão
+		// Conexao
 		Registry registro = null;
 		UsuarioDao usuario = DaoFactory.createUsuarioDao();
 
@@ -26,13 +26,8 @@ public class Program {
 			System.out.println("Erro no Servidor:" + e.getMessage());
 		}
 		if (usuario.teste()) {
-			System.out.println("Funções testadas");
+			System.out.println("Funcoes testadas");
 		}
 		System.out.println("Servidor online");
-
-		
-		
-		
 	}
-
 }

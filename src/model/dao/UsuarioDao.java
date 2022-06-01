@@ -21,7 +21,7 @@ public interface UsuarioDao extends Remote{
 	
 	
 	//consultas	
-	public abstract String findNameByEmail(String email) throws RemoteException;
+	public abstract String findNameByEmail(int idLogin) throws RemoteException;
 	public abstract String findById(int idLogin) throws RemoteException;
 	public abstract int findIdByEmail(int idLogin) throws RemoteException;
 	
