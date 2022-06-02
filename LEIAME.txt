@@ -5,4 +5,4 @@ Instruções de como executar o programa:
 3- Importar JRE System library (na criação do projeto foi utilizada o JavaSE-17).
 4- Configurar user e password no arquivo 'db.properties' e caso necessário atualizar o dburl.
 5- Executar o Servidor.java (Email/src/application/Servidor.java).
-6- Executar o Usuario.java (UsuarioEmail/src/model/dao/Usuario.java).
+6- Executar o Cliente.java (UsuarioEmail/src/model/dao/Cliente.java).
