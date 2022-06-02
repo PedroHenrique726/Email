@@ -9,7 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import model.dao.DaoFactory;
 import model.dao.UsuarioDao;
 
-public class Program {
+public class Servidor {
 
 	public static void main(String[] args) throws RemoteException {
 
